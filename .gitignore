@@ -30,10 +30,28 @@ vignettes/*.pdf
 # knitr and R markdown default cache directories
 *_cache/
 /cache/
+*_data/
+/data/
+/output/
+/docs/
+*_docs/
+/script/junk
 
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
+# produced rMarkdown stuff
+script/*.html
+script/*.pdf
+script/*.jpeg
+script/*.png
+
+*.png
+*.jpeg
+*.csv
+*.pdf
+
 
 # R Environment Variables
 .Renviron
+
