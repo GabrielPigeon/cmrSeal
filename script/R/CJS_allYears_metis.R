@@ -7,7 +7,7 @@ library(coda)
 library(boot)
 
 # mydat for all yrs -------------------------------------------------------
-load("~/project/def-pelleti2/renl2702/phoques/20211031_cmr_pup35.RData")
+load("~/projects/def-pelleti2/renl2702/phoques/20211031_cmr_pup35.RData")
 # load(
 #     "/Users/LimoilouARenaud/Documents/PostDocI/Phoque/Data/Mine/20211031_cmr_pup35.RData"
 # )
@@ -169,7 +169,7 @@ newOut <- nimbleMCMC(
     samplesAsCodaMCMC = TRUE
 )
 newOut$samples <- lapply(newOut$samples,function(x) x[,!grepl('z',colnames(x))])
-saveRDS(newOut,file=paste0('~/project/def-pelleti2/renl2702/phoques/outputs/metis_cjs_',years[i],'.rds'))
+saveRDS(newOut,file=paste0('~/projects/def-pelleti2/renl2702/phoques/outputs/metis_cjs_',years[i],'.rds'))
 rm(newOut,data)
 
 }

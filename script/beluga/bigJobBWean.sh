@@ -16,7 +16,7 @@ module load r/4.0.2
 # module list # List loaded modules
 
 # Other commands can be included below
-# cd ~/projects/def-pelleti2/renl2702/phoques
+cd ~/projects/def-pelleti2/renl2702/phoques
 
 R CMD BATCH --no-save --no-restore CJS_allYears_bic.R
 #Rscript --verbose jsms1_metis.R
