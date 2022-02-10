@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=def-pelleti2
-#SBATCH --time=0-48:05           # time (DD-HH:MM)
+#SBATCH --time=0-00:05           # time (DD-HH:MM)
 #SBATCH --ntasks=2              # 12 core(CPU)
 #SBATCH --job-name=jollySeber   # sensible name for the job
 #SBATCH --mem-per-cpu=20G                 # Default memory per CPU is 3GB.
@@ -18,7 +18,7 @@ module load r/4.0.2
 # Other commands can be included below
 cd ~/projects/def-pelleti2/renl2702/phoques
 
-R CMD BATCH --no-save --no-restore CJS_allYears_bic.R
+R CMD BATCH --no-save --no-restore nimbletest.R
 #Rscript --verbose jsms1_metis.R
 
 
