@@ -17,7 +17,7 @@ cjs2 <- nimbleCode({
     # Priors and constraints
     for (i in 1:nind) {
         for (t in f[i]:(n.occasions - 1)) {
-            phi[i, t] <- pho[i,t] ^ (delta.occ[t]/30)
+            phi[i, t] <- pho[i,t] ^ delta.occ[t]
             logit(pho[i,t]) <- mean.phi+sbw*weaned[i,t]+ranef.yr[t]
         }
         
@@ -36,12 +36,6 @@ cjs2 <- nimbleCode({
     sbw ~ dnorm(0, 0.001)
     sd.yr~ dunif(0, 5)
     sd.ip~ dunif(0, 5)
-    
-    logit(wean.surv)<-mean.phi
-    # tmp1<-wean.surv^(1/30)
-    # mean.phi<-logit(tmp1)
-    
-    
     # add growth curve - linear
     for (j in 1:Nw) {
         # nb lines mass 1998
@@ -80,7 +74,8 @@ cjs2 <- nimbleCode({
     for (t in 1:(n.occasions-1)) {
         delta.occ[t] <- captureJJ[t + 1] - captureJJ[t]
         # daily.surv[t] <- phi[t]^(1/delta.occ[t]) # ici phi constant - pareil toutes les modèles
-            }
+        wean.surv[t] <-  ilogit(mean.phi )^ 30 # prop de survie à 34 jours selon la survie de chaque occ. ICI on a transformé mean.phi en valeur journaliere car on a considéré plus haut le delta.occ dans mean.phi directement.
+    }
 })
 
 

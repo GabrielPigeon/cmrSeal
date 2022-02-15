@@ -17,8 +17,8 @@ cjs2 <- nimbleCode({
     # Priors and constraints
     for (i in 1:nind) {
         for (t in f[i]:(n.occasions - 1)) {
-            phi[i, t] <- pho[i,t] ^ (delta.occ[t]/30)
-            logit(pho[i,t]) <- mean.phi+sbw*weaned[i,t]+ranef.yr[t]
+            phi[i, t] <- pho[i,t] ^ (delta.occ[t]/30) # this is the monthly survival. A daily to the power of time intervals brought back on days. 
+            logit(pho[i,t]) <- mean.phi+sbw*weaned[i,t]+ranef.yr[t] # this is the daily survival
         }
         
         for (t in 1:n.occasions) {
@@ -156,7 +156,8 @@ parameters <-
         "sd.bd",
         "sd.mass",
         "wean.surv",
-        "delta.occ"
+        "delta.occ",
+        "pho"
     ) # added w and z to WAIC - here z is shitty
 
 newOut <- nimbleMCMC(
