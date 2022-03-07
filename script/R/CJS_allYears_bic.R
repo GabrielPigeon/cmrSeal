@@ -7,7 +7,7 @@ library(coda)
 library(boot)
 
 # mydat for all yrs -------------------------------------------------------
-load("~/projects/def-pelleti2/renl2702/phoques/20211031_cmr_pup35.RData")
+load("~/projects/def-pelleti2/renl2702/phoques/2022-02-25_dummyDf.RData")
 # load(
 #     "/Users/LimoilouARenaud/Documents/PostDocI/Phoque/Data/Mine/20211031_cmr_pup35.RData"
 # )
@@ -17,12 +17,15 @@ cjs2 <- nimbleCode({
     # Priors and constraints
     for (i in 1:nind) {
         for (t in f[i]:(n.occasions - 1)) {
+           #  pho est donc la probabilite survie pour une durée de 30 jour (age au weaning ? ou monthly survival) 
+           # le modele ne calcule pas de survie journaliere. Mais si ta duree de weaning est de 30, alors tu n'a pas besoin de transfo ou de delta method
             phi[i, t] <- pho[i,t] ^ (delta.occ[t]/30) # this is the monthly survival. A daily to the power of time intervals brought back on days. 
+            # phi est ta prob de survie entre 2 occasions
             logit(pho[i,t]) <- mean.phi+sbw*weaned[i,t]+ranef.yr[t] # this is the daily survival
         }
         
         for (t in 1:n.occasions) {
-            weaned[i, t] <- (captureJJ[t] - bDate[i]) > weanedAge # age # petti vecteur de 10 dates # weanedAge=constante
+            weaned[i, t] <- (captureJJ[t] - bDate[i]) > weanedAge # age # vecteur de 10 dates # weanedAge=constante
             logit(p[i, t]) <- mean.p + weaned[i, t] * betaWeaned+ranef.id[i]
         } #t
         ranef.id[i]~ dnorm(0, sd=sd.ip)
@@ -37,10 +40,15 @@ cjs2 <- nimbleCode({
     sd.yr~ dunif(0, 5)
     sd.ip~ dunif(0, 5)
     
-    logit(wean.surv)<-mean.phi
+    logit(wean.surv)<-mean.phi 
+    # et logit(wean.surv) = mean.phi  (et pho[i,t] <- mean.phi+...., ce qui porte a confusion), 
+    # alors ta survie au sevrage est directement obtenue avec son CI de la variable "wean.surv"
     # tmp1<-wean.surv^(1/30)
     # mean.phi<-logit(tmp1)
     
+    # tu pourrais deriver la surv jounalière en faisant:  s_m = s_j^30   =>    sj = wean.surv ^(1/30)
+    
+
     
     # add growth curve - linear
     for (j in 1:Nw) {

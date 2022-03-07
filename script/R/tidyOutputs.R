@@ -26,13 +26,15 @@ background_grid(
     color.major = "grey85",
     color.minor = "grey85"
 )
+
+
 # prepare df to graph
 tmp <- data.frame(yr = rep(c(1998:2003, 2008:2016, 2019),2), site = c(rep('bic',16),rep('metis',16)), N = NA, ymin = NA, ymax = NA, 
                   surv = NA, min.surv = NA, max.surv = NA)
 
 
 # locate right model folder 
-setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output/data/outputs.tmp.nosync/bic")
+setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output/data/outputs.tmp.nosync/bic/20220225")
 
 # extract the list of all files in that folder 
 
@@ -109,10 +111,10 @@ for(i in 1:length(fd)){
     tmp[tmp$site=='metis',]$max.surv[i]=quantile(weanSurv, 0.975)
 }
 
-tmp1 <- data.frame(yr = c(2004:2007, 2017:2018), N = NA, ymin = NA, ymax = NA, surv = NA, min.surv = NA, max.surv = NA)
-results_M<-rbind(tmp, tmp1)
-levels(factor(results_M$yr))
-results_M$yr <- as.numeric(as.character(results_M$yr))
+# tmp1 <- data.frame(yr = c(2004:2007, 2017:2018), N = NA, ymin = NA, ymax = NA, surv = NA, min.surv = NA, max.surv = NA)
+# results_M<-rbind(tmp, tmp1)
+# levels(factor(results_M$yr))
+# results_M$yr <- as.numeric(as.character(results_M$yr))
 
 
 tmp1 <- data.frame(yr = rep(c(2004:2007, 2017:2018),2), site = c(rep('bic',6),rep('metis',6)), N = NA, ymin = NA, ymax = NA, surv = NA, min.surv = NA, max.surv = NA)
@@ -124,9 +126,8 @@ results_all %>%
  # write.csv(file = "/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output/data/modelCJS_randomYRID.csv", row.names = FALSE)
 
 # graph both site next to each other
-results_all %>% 
-    ggplot(aes(x=yr, y=surv, ymin=min.surv, ymax=max.surv, color=site)) +
-    geom_pointrange(position=position_dodge(w=0.5), size = 1) +
+ggplot(results_all, aes(x=yr, y=surv, ymin=min.surv, ymax=max.surv, color=site)) +
+    geom_pointrange(position=position_dodge(w=0.5)) +
     labs(x=expression('Year')) + 
     labs(y="Preweaning survival") +  
     scale_y_continuous(limits = c(0,1),breaks = seq(from = 0, to = 1, by = 0.1)) +
@@ -181,7 +182,13 @@ tmp[tmp$site=='metis',]$surv[i]=mean(weanSurv) # moyenne et quantiles pour les i
 tmp[tmp$site=='metis',]$min.surv[i]= quantile(weanSurv, 0.025)
 tmp[tmp$site=='metis',]$max.surv[i]=quantile(weanSurv, 0.975)
 
-
+mean(surv)
+0.7779663^30
+# 0.000535579
+var(weanSurv)
+900 * 0.03074292 * (0.7779663^58) #1.311333e-05
+0.000535579-(1.96*1.311333e-05) # 0.0005098769
+0.000535579+(1.96*1.311333e-05) # 0.0005612811
 
 
 

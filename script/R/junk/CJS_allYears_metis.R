@@ -17,7 +17,8 @@ cjs2 <- nimbleCode({
     # Priors and constraints
     for (i in 1:nind) {
         for (t in f[i]:(n.occasions - 1)) {
-            phi[i, t] <- pho[i,t] ^ delta.occ[t]
+            phi[i, t] <- pho[i,t] ^ delta.occ[t] # pho est donc la survie journaliere. # phi est ta prob de survie entre 2 occasions
+            #   tu peut extraire sa valeur populationelle via la variable "mean.phi" , mais attention. celle-ci est sur l'echelle logit. tu dois donc inv.logit'er
             logit(pho[i,t]) <- mean.phi+sbw*weaned[i,t]+ranef.yr[t]
         }
         
@@ -75,6 +76,7 @@ cjs2 <- nimbleCode({
         delta.occ[t] <- captureJJ[t + 1] - captureJJ[t]
         # daily.surv[t] <- phi[t]^(1/delta.occ[t]) # ici phi constant - pareil toutes les modèles
         wean.surv[t] <-  ilogit(mean.phi )^ 30 # prop de survie à 34 jours selon la survie de chaque occ. ICI on a transformé mean.phi en valeur journaliere car on a considéré plus haut le delta.occ dans mean.phi directement.
+       # sinon, la variable 'wean.surv[1]' te donne la PROBABILITE de survivre 30 jours (wean.surv[t] <- ilogit(mean.phi )^ 30 )
     }
 })
 
