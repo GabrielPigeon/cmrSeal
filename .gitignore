@@ -50,7 +50,9 @@ script/*.png
 *.jpeg
 *.csv
 *.pdf
-
+*.docx
+*.html
+*.rds
 
 # R Environment Variables
 .Renviron
