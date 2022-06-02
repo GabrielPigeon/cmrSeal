@@ -32,7 +32,9 @@ vignettes/*.pdf
 /cache/
 *_data/
 /data/
+/docx/
 /output/
+/output.nosync/
 /docs/
 *_docs/
 /script/junk
