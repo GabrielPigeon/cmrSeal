@@ -361,6 +361,12 @@ ggplot(df_N,aes(x=as.factor(yr), color = site))+
 #   scale_colour_manual(values = c("bic" = "#FFDB6D", "metis" = "#00AFBB")) + theme_cowplot(12) +
 #   theme(panel.grid.major = element_line(color="lightgrey", linetype = 'dotted')) 
 
+# get means (june version)
+meanSurvBic <- weanSurvOut_b_summa %>% filter(yr!=2003|site!='bic') 
+meanSurvBic <- mean(meanSurvBic$weanSurv_mean)
+
+meanSurvMetis <- weanSurvOut_m_summa %>% filter(yr!=2013|site!='metis')
+meanSurvMetis <- mean(weanSurvOut_m_summa$weanSurv_mean)
 
 # try wit this df 
 weanSurvOut_b_summa$site <- 'bic'
