@@ -17,12 +17,15 @@ rm(list = ls())
 
 years<- c(seq(as.numeric("1998"), as.numeric("2003"), by=1), seq(as.numeric("2008"), as.numeric("2016"), by=1), 2019)
 
-#  get gelmanRubin and WAIC for Jolly Seber--------------------------------------------------------
+#  get gelmanRubin and WAIC for Jolly Seber at Bic--------------------------------------------------------
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/bic/20210304/bic1")
 
+
 aicb1<-data.frame(year = c(1998:2003, 2008:2016, 2019), file_name=NA, WAIC = NA)
+
 fd<-list()
 file <-list.files(pattern = ".rds")
+
 for(i in seq_along(file)){
     fd[[i]]<-readRDS(file[[i]])
     filename_uid <- unlist(strsplit(file[[i]], "_"))[3]
@@ -50,12 +53,14 @@ gelman1 <- map_dfr(1:length(gelmanN_bic),function(x) {
   data.frame(yr=years[x],
              y=as.numeric(unlist(gelmanN_bic[[x]]))# $samples[,'weanSurv']
   )
-}) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1)
+}) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1) # none is above 1.1
 
 
 
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/bic/20210304/bic2")
+
 aicb2<-data.frame(year = c(1998:2003, 2008:2016, 2019), file_name=NA, WAIC = NA)
+
 fd<-list()
 file <-list.files(pattern = ".rds")
 for(i in seq_along(file)){
@@ -85,11 +90,16 @@ gelman2 <-map_dfr(1:length(gelmanN_bic),function(x) {
              y=as.numeric(unlist(gelmanN_bic[[x]]))# $samples[,'weanSurv']
   )
 }) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1)
-
+# yr     y
+# <dbl> <dbl>
+# 1  2001  1.15
+# 2  2012  1.48
 
 
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/bic/20210304/bic3")
+
 aicb3<-data.frame(year = c(1998:2003, 2008:2016, 2019), file_name=NA, WAIC = NA)
+
 fd<-list()
 file <-list.files(pattern = ".rds")
 for(i in seq_along(file)){
@@ -119,10 +129,13 @@ gelman3 <- map_dfr(1:length(gelmanN_bic),function(x) {
              y=as.numeric(unlist(gelmanN_bic[[x]]))# $samples[,'weanSurv']
   )
 }) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1)
+# 1  1999  1.11
 
 
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/bic/20210304/bic4")
+
 aicb4<-data.frame(year = c(1998:2003, 2008:2016, 2019), file_name=NA, WAIC = NA)
+
 fd<-list()
 file <-list.files(pattern = ".rds")
 for(i in seq_along(file)){
@@ -131,6 +144,7 @@ for(i in seq_along(file)){
     #dfWAIC[i,2]<-filename_uid
     aicb4[i,3]<-fd[[i]]['WAIC']
 }
+
 codaSamp<-list()
 for(i in 1:length(fd)){
   codaSamp[[i]] <- fd[[i]]$samples %>% map(~as.mcmc(.x)) %>% as.mcmc.list() # did not converge well in 2001, 2002 and 2014
@@ -149,6 +163,8 @@ gelman4 <- map_dfr(1:length(gelmanN_bic),function(x) {
              y=as.numeric(unlist(gelmanN_bic[[x]]))# $samples[,'weanSurv']
   )
 }) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1)
+
+# 1  2019  1.11 but 2003 doesn't look good
 
 
 # add no5 here #ERROR IN SD RUNIF -REPLACE BY DUNIF
@@ -186,7 +202,7 @@ gelman5 <- map_dfr(1:length(gelmanN_bic),function(x) {
 
 # yr     y
 # <dbl> <dbl>
-#   1  1999  1.23
+# 1  1999  1.23
 # 2  2003  2.70
 # 3  2010  1.13
 # 4  2012  1.13
@@ -233,6 +249,21 @@ gelman6 <- map_dfr(1:length(gelmanN_bic),function(x) {
 # 5  2015  1.15
 # 6  2016  1.10
 
+# AND MORE 
+# yr     y
+# <dbl> <dbl>
+# 1  1998  5.06
+# 2  1999  1.32
+# 3  2000  1.16
+# 4  2001  1.44
+# 5  2002  1.29
+# 6  2010  1.42
+# 7  2011  1.30
+# 8  2012  1.24
+# 9  2013  1.26
+# 10  2015  1.14
+# 11  2016  1.22
+
 
 # m7
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/bic/20210614/bic7")
@@ -267,7 +298,7 @@ gelman7 <- map_dfr(1:length(gelmanN_bic),function(x) {
 
 # yr     y
 # <dbl> <dbl>
-#   1  1998  1.51
+# 1  1998  1.51
 # 2  2002  1.26
 # 3  2008  1.17
 # 4  2014  1.21
@@ -287,8 +318,17 @@ aicT[6,3]<-mean(aicb6$WAIC, na.rm = T)
 aicT[7,3]<-mean(aicb7$WAIC, na.rm = T)
 
 
+# model description     WAIC
+# 1     1          NA 576.1611
+# 2     2          NA 538.7613
+# 3     3          NA 510.2901 MODEL 3 HAS THE LOWEST WAIC
+# 4     4          NA 551.5245
+# 5     5          NA 616.6923
+# 6     6          NA 662.1819
+# 7     7          NA 591.1608
 
-# metis
+
+#  get gelmanRubin and WAIC for Jolly Seber at MEtis--------------------------------------------------------
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20210304/metis1")
 
 aicm1<-data.frame(year = c(1998:2003, 2008:2016, 2019), file_name=NA, WAIC = NA)
@@ -323,6 +363,13 @@ gelman1 <- map_dfr(1:length(gelmanN_metis),function(x) {
 
 
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20210304/metis2")
+
+codaSamp<-list()
+for(i in 1:length(fd)){
+    codaSamp[[i]] <- fd[[i]]$samples %>% map(~as.mcmc(.x)) %>% as.mcmc.list()                    # transform to coda
+    plot(codaSamp[[i]][,'Nsuper'], main = paste0("N_y_", substr(file, 16, 20))[[i]])
+}
+
 aicm2<-data.frame(year = c(1998:2003, 2008:2016, 2019), file_name=NA, WAIC = NA)
 fd<-list()
 file <-list.files(pattern = ".rds")
@@ -354,6 +401,16 @@ gelman2 <- map_dfr(1:length(gelmanN_metis),function(x) {
 
 
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20210304/metis3")
+
+# quick check
+codaSamp<-list()
+for(i in 1:length(fd)){
+    codaSamp[[i]] <- fd[[i]]$samples %>% map(~as.mcmc(.x)) %>% as.mcmc.list()                    # transform to coda
+    plot(codaSamp[[i]][,'Nsuper'], main = paste0("N_y_", substr(file, 16, 20))[[i]])
+}
+
+
+# nice table
 aicm3<-data.frame(year = c(1998:2003, 2008:2016, 2019), file_name=NA, WAIC = NA)
 fd<-list()
 file <-list.files(pattern = ".rds")
@@ -416,7 +473,9 @@ gelman4 <- map_dfr(1:length(gelmanN_metis),function(x) {
 #  MODEL 5 HAS AN ERROR - REPLACE RUNIF BY DUNIF
 
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20210304/metis5")
+
 aicm5<-data.frame(year = c(1998:2003, 2008:2016, 2019), file_name=NA, WAIC = NA)
+
 fd<-list()
 file <-list.files(pattern = ".rds")
 for(i in seq_along(file)){
@@ -425,9 +484,10 @@ for(i in seq_along(file)){
   #dfWAIC[i,2]<-filename_uid
   aicm5[i,3]<-fd[[i]]['WAIC'] # ATTENTION MIGHT NEED TO CHANGE 
 }
+
 codaSamp<-list()
 for(i in 1:length(fd)){
-  codaSamp[[i]] <- fd[[i]]$samples %>% map(~as.mcmc(.x)) %>% as.mcmc.list() # did not converge well in 2001, 2002 and 2014
+  codaSamp[[i]] <- fd[[i]]$samples %>% map(~as.mcmc(.x)) %>% as.mcmc.list() # did not converge well in 2001, 2002 and 2014 2013 either
   plot(codaSamp[[i]][,'Nsuper'], main = paste0("N_y", substr(file, 16, 20))[[i]])
 }
 
@@ -446,7 +506,10 @@ gelman5 <- map_dfr(1:length(gelmanN_metis),function(x) {
 
 
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20220319/metis6")
+
+# waic table 
 aicm6<-data.frame(year = c(1998:2003, 2008:2016, 2019), file_name=NA, WAIC = NA)
+
 fd<-list()
 file <-list.files(pattern = ".rds")
 for(i in seq_along(file)){
@@ -477,16 +540,21 @@ gelman6 <- map_dfr(1:length(gelmanN_metis),function(x) {
 
 
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20220319/metis7")
+
 aicm7<-data.frame(year = c(1998:2003, 2008:2016, 2019), file_name=NA, WAIC = NA)
+
 fd<-list()
 file <-list.files(pattern = ".rds")
+
 for(i in seq_along(file)){
   fd[[i]]<-readRDS(file[[i]])
   #filename_uid <- unlist(strsplit(file[[i]], "_"))[3]
   #dfWAIC[i,2]<-filename_uid
   aicm7[i,3]<-fd[[i]]$WAIC$WAIC # NEW to this way of doing
 }
+
 codaSamp<-list()
+
 for(i in 1:length(fd)){
   codaSamp[[i]] <- fd[[i]]$samples %>% map(~as.mcmc(.x)) %>% as.mcmc.list() # did not converge well in 2001, 2002 and 2014
   plot(codaSamp[[i]][,'Nsuper'], main = paste0("N_y", substr(file, 16, 20))[[i]])
@@ -504,6 +572,9 @@ gelman7 <- map_dfr(1:length(gelmanN_metis),function(x) {
   )
 }) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1)
 
+
+
+
 # not so sure about mod 6 and 7 since Nsuper was not extracted correctly - all look the same 
 
 aicTM<-data.frame(model = c(1:7), description=NA, WAIC = NA)
@@ -515,6 +586,41 @@ aicTM[5,3]<-mean(aicm5$WAIC, na.rm = T)
 aicTM[6,3]<-mean(aicm6$WAIC, na.rm = T)
 aicTM[7,3]<-mean(aicm7$WAIC, na.rm = T)
 
+# model description     WAIC
+# 1     1          NA 211.3084
+# 2     2          NA 186.6068
+# 3     3          NA 178.2099 # LOWEST 
+# 4     4          NA 200.6816
+# 5     5          NA 243.1421
+# 6     6          NA 163.6585 # lowest but convergence issues
+# 7     7          NA 144.9370 # lowest but convergence issues
+
+
+
+gelman1 # none
+gelman2
+# yr     y
+# <dbl> <dbl>
+# 1  2000  1.21
+# 2  2015  1.12
+# 3  2019  1.31
+gelman3 # none
+gelman4 # none
+gelman5
+# yr     y
+# <dbl> <dbl>
+#  1  1999  1.11
+# 2  2000  1.11
+# 3  2002  1.17
+# 4  2009  1.21
+# 5  2012  1.17
+# 6  2013  2.75
+# 7  2014  1.19
+# 8  2015  1.20
+# 9  2016  1.25
+
+gelman6 # none
+gelman7 # none
 
 
 # quick convergence check for model 7 - metis - DIDNT'T WORK
@@ -530,7 +636,10 @@ for(i in 1:length(fd)){
 
 
 
-# get gelmanRubin statistics and WAIC for Cormack-Jolly-Seber (survival estimates)--------------------------------------------------------
+
+
+
+# get gelmanRubin statistics and WAIC for Cormack-Jolly-Seber at Bic (survival estimates)--------------------------------------------------------
 
 #sapply(outlist, function(x) x$WAIC$WAIC)
 
@@ -541,9 +650,11 @@ for(i in 1:length(fd)){
 # decompresser le rds avec une connection speciale
 # ATTENTION CA DIT PAS TOUJOURS SI Y A UNE ERREUR D'EMPLACEMENT
 
+# models were rerun with 500K and are used from the 20220517 folder - this improved gelman
 
-con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220422/bic_cjs1.rds")
+con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220517/bic_cjs1.rds")
 outlist <- readRDS(con)
+
 WAIC.b.1<- sapply(outlist,function(x)x$WAIC$WAIC) %>% as.data.frame() %>% rename(WAIC='.') %>% mutate(yr=years) # no need to transpose here
 
 gelmanCJS_b <- vector("list",length=16)
@@ -556,12 +667,22 @@ map_dfr(1:length(gelmanCJS_b),function(x) {
   data.frame(yr=years[x],
              y=as.numeric(unlist(gelmanCJS_b[[x]]))# $samples[,'weanSurv']
   )
-}) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1) 
+}) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1) # most do not converge 
+# 
+# yr     y
+# <dbl> <dbl>
+# 1  2000  1.11
+# 2  2002  1.22
+# 3  2008  3.41 
+# 4  2009  1.55
+# 5  2011  1.13
+# 6  2019  1.10
 
 
-con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220422/bic_cjs2_fewIT.rds")
+con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220517/bic_cjs2.rds")
 #con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/bic_cjs_Gab2_fewIt.rds") # did not have WAIC?
 outlist <- readRDS(con)
+
 WAIC.b.2<- sapply(outlist,function(x)x$WAIC$WAIC) %>% as.data.frame() %>% rename(WAIC='.') %>% mutate(yr=years) # no need to transpose here
 
 gelmanCJS_b <- vector("list",length=16)
@@ -574,11 +695,18 @@ map_dfr(1:length(gelmanCJS_b),function(x) {
   data.frame(yr=years[x],
              y=as.numeric(unlist(gelmanCJS_b[[x]]))
   )
-}) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1) # 2012 is very bad
+}) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1) # 2012 is very bad with less than 500 k it
+
+# yr     y
+# <dbl> <dbl>
+#1  2008  1.10
+# 2  2011  1.22
+# 3  2013  1.34
+# 4  2015  1.17
 
 
 
-con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220511/cjs3_ranef.rds")
+con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220517/cjs3_ranef.rds")
 outlist <- readRDS(con)
 WAIC.b.3<- sapply(outlist,function(x)x$WAIC$WAIC) %>% as.data.frame() %>% rename(WAIC='.') %>% mutate(yr=years) # no need to transpose here
 
@@ -593,11 +721,19 @@ map_dfr(1:length(gelmanCJS_b),function(x) {
              y=as.numeric(unlist(gelmanCJS_b[[x]]))# $samples[,'weanSurv']
   )
 }) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1) # 2012  6.01
+# yr     y
+# <dbl> <dbl>
+#     1  1999  1.24
+# 2  2008  1.99
+# 3  2009  1.45
+# 4  2011  1.37
+# 5  2012  1.17
+# 6  2013  1.40
 
 
-
-con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220422/cjs4.rds") # no good
+con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220517/cjs4.rds") # no good
 outlist <- readRDS(con)
+
 WAIC.b.4<- sapply(outlist,function(x)x$WAIC$WAIC) %>% as.data.frame() %>% rename(WAIC='.') %>% mutate(yr=years) # no need to transpose here
 
 gelmanCJS_b <- vector("list",length=16)
@@ -610,23 +746,37 @@ map_dfr(1:length(gelmanCJS_b),function(x) {
   data.frame(yr=years[x],
              y=as.numeric(unlist(gelmanCJS_b[[x]]))# $samples[,'weanSurv']
   )
-}) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1)
+ }) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1)
 # yr     y
 # <dbl> <dbl>
-#   1  1999  1.37
-# 2  2001  1.49
-# 3  2002  1.18
-# 4  2003  1.13
-# 5  2008  1.76
-# 6  2009  2.16
-# 7  2011  1.12
-# 8  2012  1.13
-# 9  2013  2.22
-# 10  2016  1.23
+# 1  2001  1.11
+# 2  2002  1.11
+    
+    
+
+survJourn=list()
+for(t in 1:length(outlist)){
+    tmp=outlist[[t]]$samples
+    tmp=tmp[,grepl("ranef.yr",colnames(tmp[[1]]))] %>% map_dfr(~as.data.frame(.x)) # il me manque le ranef.yr - prendre juste le meilleur modele
+}
+    
+    dailysurvs<-matrix(NA, nrow(tmp),ncol(tmp)
+                        for(d in 1:ncol(tmp)){ 
+                            dailysurvs[,d]=inv.logit(mean.phi + ranef.yr[d])
+                        }
+                        survJourn[[t]]=dailysurvs
+                        }
 
 
-con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220422/cjs5.rds")
+
+
+
+
+
+
+con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220517/cjs5.rds")
 outlist <- readRDS(con)
+
 WAIC.b.5<- sapply(outlist,function(x)x$WAIC$WAIC) %>% as.data.frame() %>% rename(WAIC='.') %>% mutate(yr=years) # no need to transpose here
 
 gelmanCJS_b <- vector("list",length=16)
@@ -642,16 +792,9 @@ map_dfr(1:length(gelmanCJS_b),function(x) {
 }) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1) # a lot ! 2008-2009 are 4 and 5
 # yr     y
 # <dbl> <dbl>
-#   1  1998  1.21
-# 2  2000  1.12
-# 3  2002  1.27
-# 4  2008  4.42
-# 5  2009  5.05
-# 6  2012  1.21
-# 7  2013  1.82
-# 8  2016  1.11
-# 9  2019  1.32
-
+#  1  2008  2.93
+# 2  2009  1.17
+# 3  2012  1.14
 
 
 
@@ -672,7 +815,19 @@ map_dfr(1:length(gelmanCJS_b),function(x) {
   )
 }) %>% as.data.frame() %>% group_by(yr) %>% slice(1) %>% filter(y>1.1) # 2009 and 2013 are over 2
 
-
+# this is from less than 500 k
+# yr     y
+# <dbl> <dbl>
+#     1  1999  1.37
+# 2  2001  1.49
+# 3  2002  1.18
+# 4  2003  1.13
+# 5  2008  1.76
+# 6  2009  2.16
+# 7  2011  1.12
+# 8  2012  1.13
+# 9  2013  2.22
+# 10  2016  1.23
 
 # summarise into one table for all years. means might not be good
 waic.table<-expand.grid(model = c(1:6), description = NA,WAIC = NA, site=c('bic', 'metis'))
@@ -685,16 +840,43 @@ waic.table[4,3]<-mean(WAIC.b.4$WAIC, na.rm = T)
 waic.table[5,3]<-mean(WAIC.b.5$WAIC, na.rm = T)
 waic.table[6,3]<-mean(WAIC.b.6$WAIC, na.rm = T)
 
+
+# model description     WAIC  site
+# 1      1          NA 807.4324   bic
+# 2      2          NA 795.3820   bic
+# 3      3          NA 815.0217   bic
+# 4      4          NA 823.2832   bic #
+# 5      5          NA 832.0710   bic
+# 6      6          NA 829.6787   bic
+# 7      1          NA       NA metis
+# 8      2          NA       NA metis
+# 9      3          NA       NA metis
+# 10     4          NA       NA metis
+# 11     5          NA       NA metis
+# 12     6          NA       NA metis
+
 #rm(list=setdiff(ls(), c("years", "waic.table")))
 
+# MODEL 4 IS NOW THE BEST FORLLOWING 2022 05 17 500 K ITERATIONS
+# 
+# model description     WAIC  site
+# 1      1          NA 831.5643   bic
+# 2      2          NA 836.0030   bic
+# 3      3          NA 831.6260   bic
+# 4      4          NA 827.6522   bic
+# 5      5          NA 846.5698   bic
+# 6      6          NA 829.6787   bic
+# 7      1          NA       NA metis
+# 8      2          NA       NA metis
+# 9      3          NA       NA metis
+# 10     4          NA       NA metis
+# 11     5          NA       NA metis
+# 12     6          NA       NA metis
 
 
 
 
-
-
-
-# Metis -------------------------------------------------------------------
+# get gelmanRubin statistics and WAIC for Cormack-Jolly-Seber at Metis (survival estimates)--------------------------------------------------------
 
 # the latest models were ran with 500K. It improved Gelman statistics
 
@@ -830,11 +1012,25 @@ map_dfr(1:length(gelmanCJS_m),function(x) {
 # summarise into same table for all years and site. means might not be good
 waic.table[7,3]<-mean(WAIC.m.1$WAIC, na.rm = T) # 311.5526 here change object name to refer to model 2
 waic.table[8,3]<-mean(WAIC.m.2$WAIC, na.rm = T)# 311.4428
-
 waic.table[9,3]<-mean(WAIC.m.3$WAIC, na.rm = T)#307.1165
 waic.table[10,3]<-mean(WAIC.m.4$WAIC, na.rm = T)# 311.018
 waic.table[11,3]<-mean(WAIC.m.5$WAIC, na.rm = T)#312.6037
 waic.table[12,3]<-mean(WAIC.m.6$WAIC, na.rm = T) #312.3701
+
+
+# model description     WAIC  site
+# 1      1          NA 831.5643   bic
+# 2      2          NA 836.0030   bic
+# 3      3          NA 831.6260   bic
+# 4      4          NA 827.6522   bic MODEL 4 FOR  BIC 
+# 5      5          NA 846.5698   bic
+# 6      6          NA 829.6787   bic
+# 7      1          NA 311.5526 metis
+# 8      2          NA 311.4428 metis
+# 9      3          NA 307.1165 metis  MODEL 3 FOR METIS
+# 10     4          NA 311.0180 metis
+# 11     5          NA 312.6037 metis
+# 12     6          NA 312.3701 metis
 
 
 # clean up a bit - keep only results? 
@@ -843,7 +1039,7 @@ waic.table[12,3]<-mean(WAIC.m.6$WAIC, na.rm = T) #312.3701
 
 
 
-# get abundance estimates from the Jolly Seber  ------------------------------------------------
+# get abundance estimates from the Jolly Seber at each site ------------------------------------------------
 
 # prepare df to graph
 tmp <- data.frame(yr = rep(c(1998:2003, 2008:2016, 2019),2), site = c(rep('bic',16),rep('metis',16)), N = NA, ymin = NA, ymax = NA, 
@@ -917,10 +1113,6 @@ for(i in 1:length(fd)){
 
 ggplot(tmp,aes(x=yr,y=N,ymin=ymin,ymax=ymax))+geom_pointrange()
 
-
-
-
-
 # metis
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20210304/metis3")
 # setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20220319/metis6")
@@ -962,16 +1154,18 @@ results_all<-rbind(tmp, tmp1)
 results_all %>%
   mutate_if(is.numeric, round, digits = 2) 
 
+ggplot(tmp,aes(x=yr,y=N,ymin=ymin,ymax=ymax))+geom_pointrange()
 
 
-
-# get survival from the best model  -----------------------------------------------------------
+# get survival from the best CJS model at each site -----------------------------------------------------------
 
 # this is the chunk to extract from gab's code with fake occasions spaced out every day.
 load(here("data/mine/20211031_cmr_pup35.RData"))
 years
 
-con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220422/bic_cjs2_fewIT.rds")
+con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220517/cjs4.rds")
+# con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220422/bic_cjs2_fewIT.rds")
+
 outlist <- readRDS(con)
 sapply(outlist, function(x) x$WAIC$WAIC) # double check with what's in WAIc.b2
 
