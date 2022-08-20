@@ -754,21 +754,21 @@ map_dfr(1:length(gelmanCJS_b),function(x) {
     
     
 
-survJourn=list()
-for(t in 1:length(outlist)){
-    tmp=outlist[[t]]$samples
-    tmp=tmp[,grepl("ranef.yr",colnames(tmp[[1]]))] %>% map_dfr(~as.data.frame(.x)) # il me manque le ranef.yr - prendre juste le meilleur modele
-}
-    
-    dailysurvs<-matrix(NA, nrow(tmp),ncol(tmp)
-                        for(d in 1:ncol(tmp)){ 
-                            dailysurvs[,d]=inv.logit(mean.phi + ranef.yr[d])
-                        }
-                        survJourn[[t]]=dailysurvs
-                        }
-
-
-
+# survJourn=list()
+# for(t in 1:length(outlist)){
+#     tmp=outlist[[t]]$samples
+#     tmp=tmp[,grepl("ranef.yr",colnames(tmp[[1]]))] %>% map_dfr(~as.data.frame(.x)) # il me manque le ranef.yr - prendre juste le meilleur modele
+# }
+#     
+#     dailysurvs<-matrix(NA, nrow(tmp),ncol(tmp)
+#                         for(d in 1:ncol(tmp)){ 
+#                             dailysurvs[,d]=inv.logit(mean.phi + ranef.yr[d])
+#                         }
+#                         survJourn[[t]]=dailysurvs
+#                         }
+# 
+# 
+# 
 
 
 
