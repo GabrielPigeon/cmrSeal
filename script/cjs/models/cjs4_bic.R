@@ -183,7 +183,8 @@ parameters <-
         "sd.bd",
         "sd.mass",
         "weanSurv",
-        'dailySurv'
+        'dailySurv', 
+        'ranef.yr'
         # "delta.occ",
         # "phi"
     ) # added w and z to WAIC - here z is shitty
