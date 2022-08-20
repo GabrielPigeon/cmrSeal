@@ -186,9 +186,9 @@ parameters <-
         "sd.bd",
         "sd.mass",
         "weanSurv",
-        'dailySurv'
+        'dailySurv',
         # "delta.occ",
-        # "phi"
+        "phi"
     ) # added w and z to WAIC - here z is shitty
 
 newOut <- nimbleMCMC(
