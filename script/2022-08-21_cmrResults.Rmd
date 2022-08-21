@@ -219,7 +219,7 @@ We found convergence issues in years with low capture rates or sample sizes: 201
 Mean birth dates, as estimated from the Cormack-Jolly-Seber model for pre-weaning survival, ranged from `r  meanBd_bic %>% slice(which.min(Mean)) %>% pull(Mean)` [`r  meanBd_bic %>% slice(which.min(Mean)) %>% pull(CIL)`,`r  meanBd_bic %>% slice(which.min(Mean)) %>% pull(CIH)`] to `r meanBd_bic %>% slice(which.max(Mean)) %>% pull(Mean)` [ `r meanBd_bic %>% slice(which.max(Mean)) %>% pull(CIL)`, `r meanBd_bic %>% slice(which.max(Mean)) %>% pull(CIH)`] at Bic Island and from `r  meanBd_metis%>% slice(which.min(Mean)) %>% pull(Mean)` [ `r  meanBd_metis %>% slice(which.min(Mean)) %>% pull(CIL)`, `r  meanBd_metis %>% slice(which.min(Mean)) %>% pull(CIH)`] to `r  meanBd_metis %>% slice(which.max(Mean)) %>% pull(Mean)` [ `r  meanBd_metis %>% slice(which.max(Mean)) %>% pull(CIL)`, `r  meanBd_metis %>% slice(which.max(Mean)) %>% pull(CIH)`] at Metis (Table S\@ref(tab:ts5)).
 
 ```{r abundance and survival}
-results_all <- results_all %>% mutate(across(where(is.numeric), round, 2))
+results_jollySeber <- results_jollySeber %>% mutate(across(where(is.numeric), round, 2))
 results_weanSurv <- results_weanSurv %>% mutate(across(where(is.numeric), round, 2))
 
 # compare to gab's extract
@@ -395,7 +395,7 @@ cowplot::plot_grid(p_panel[[16]],p_panel[[2]], labels=c('a)','b)'))
 
 
 
-# Supplementary Information
+# supplementary tables 
 
 ```{r JS model description, echo=FALSE}
 jsmodels <- aicT[1:5, 1:2]
@@ -496,7 +496,20 @@ names(meanBd_metis) <- c("Year" , "Mean date","Median date","St.Dev.", "Lower CR
 knitr::kable(meanBd_metis,caption = "Estimated parturition date of harbour seal pups, Metis, Quebec, Canada, 1998-2019. Parturition date was modeled as a function of body mass within a Cormack-Jolly-Seber model of pre-weaning survival. Each year was modeled independently and estimates are from a model with a fixed time effect on capture probability and a random time effect on daily survival probability. No data were available for 2004-2007 and 2017-2018. CRI: 95% credibilibity interval.", "simple")
 ```
 
+## supplementary figures - daily surv, phi and p
+```{r}
+survJourn=list()
+for(t in 1:length(outlist)){
+    tmp=outlist[[t]]$samples
+    tmp=tmp[,grepl("ranef.yr",colnames(tmp[[1]]))] %>% map_dfr(~as.data.frame(.x))
+    dailysurvs<-matrix(NA, nrow(tmp),ncol(tmp))
+                        for(d in 1:ncol(tmp)){
+                            dailysurvs[,d]=inv.logit(mean.phi + ranef.yr[d]) # sauve pas mean.phi
+                        }
+                        survJourn[[t]]=dailysurvs
+                        }
 
+```
 
 
 

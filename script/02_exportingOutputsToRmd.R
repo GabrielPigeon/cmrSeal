@@ -17,7 +17,7 @@ rm(list = ls())
 
 years<- c(seq(as.numeric("1998"), as.numeric("2003"), by=1), seq(as.numeric("2008"), as.numeric("2016"), by=1), 2019)
 
-#  get gelmanRubin and WAIC for Jolly Seber at Bic--------------------------------------------------------
+# JS BIC- get gelmanRubin and WAIC for Jolly Seber at Bic--------------------------------------------------------
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/bic/20210304/bic1")
 
 
@@ -328,7 +328,7 @@ aicT[7,3]<-mean(aicb7$WAIC, na.rm = T)
 # 7     7          NA 591.1608
 
 
-#  get gelmanRubin and WAIC for Jolly Seber at MEtis--------------------------------------------------------
+# JS METIS - get gelmanRubin and WAIC for Jolly Seber at MEtis--------------------------------------------------------
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20210304/metis1")
 
 aicm1<-data.frame(year = c(1998:2003, 2008:2016, 2019), file_name=NA, WAIC = NA)
@@ -635,87 +635,17 @@ for(i in 1:length(fd)){
 }
 
 
+# clean up  ---------------------------------------------------------------
+
+rm(list=setdiff(ls(), c("years", "aicTM","aicT")))
 
 
 
-# get abundance estimates from the Jolly Seber at each site ------------------------------------------------
-
-# prepare df to graph
-tmp <- data.frame(yr = rep(c(1998:2003, 2008:2016, 2019),2), site = c(rep('bic',16),rep('metis',16)), N = NA, ymin = NA, ymax = NA, 
-                  surv = NA, min.surv = NA, max.surv = NA)
-
-# bst model for abundance 
-setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/bic/20210304/bic3") # lowest WAIC
-# setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/bic/20210614/bic6")
-
-fd<-list()
-file <-list.files(pattern = ".rds")
-for(i in seq_along(file)){
-    fd[[i]]<-readRDS(file[[i]])
-}
-
-for(i in 1:length(fd)){
-    sample_df=fd[[i]]$samples %>% map(as.data.frame) %>% bind_rows() # c long 
-    N=sample_df[,grepl('Nsuper',colnames(sample_df))]
-    tmp[tmp$site=='bic',]$N[i]=mean(N)
-    tmp[tmp$site=='bic',]$ymin[i]= quantile(N, 0.025)
-    tmp[tmp$site=='bic',]$ymax[i]=quantile(N, 0.975)
-}
-
-
-# now extract with a time lag
-# tmp <- tibble(Nt1 = lead(tmp$N), tmp)
-# tmp$lambda <- tmp$Nt1/tmp$N
 
 
 
-# metis
-setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20210304/metis3")
-# setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20220319/metis6")
-# setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20220322")
 
-fd<-list()
-file <-list.files(pattern = ".rds")
-for(i in seq_along(file)){
-    fd[[i]]<-readRDS(file[[i]])
-}
-
-# check convergence 
-codaSamp<-list()
-for(i in 1:length(fd)){
-    codaSamp[[i]] <- fd[[i]]$samples %>% map(~as.mcmc(.x)) %>% as.mcmc.list()                 
-    plot(codaSamp[[i]][,'Nsuper'], main = paste0("N_y", substr(file, 16, 20))[[i]])
-}
-
-
-# get N
-for(i in 1:length(fd)){
-    sample_df=fd[[i]]$samples %>% map(as.data.frame) %>% bind_rows() 
-    N=sample_df[,grepl('Nsuper',colnames(sample_df))] # un seul N, sur la bonne échelle
-    tmp[tmp$site=='metis',]$N[i]=mean(N)
-    tmp[tmp$site=='metis',]$ymin[i]= quantile(N, 0.025)
-    tmp[tmp$site=='metis',]$ymax[i]=quantile(N, 0.975)
-}
-
-# N <- sapply(fd,function(x) x$summary$all.chains['Nsuper',]) %>%
-#   t() %>% as.data.frame() %>% rename(CIL=`95%CI_low`,CIH=`95%CI_upp`) %>% mutate(yr=years)
-# N$site <- "metis"
-# ggplot(N,aes(x=yr,y=Mean,ymin=CIL,ymax=CIH))+geom_pointrange()
-
-
-tmp1 <- data.frame(yr = rep(c(2004:2007, 2017:2018),2), site = c(rep('bic',6),rep('metis',6)), N = NA, ymin = NA, ymax = NA, surv = NA, min.surv = NA, max.surv = NA)
-results_all<-rbind(tmp, tmp1)
-
-#export table with probabilities
-results_all %>%
-    mutate_if(is.numeric, round, digits = 2) 
-
-ggplot(tmp,aes(x=yr,y=N,ymin=ymin,ymax=ymax))+geom_pointrange()
-
-
-
-# get gelmanRubin statistics and WAIC for Cormack-Jolly-Seber at Bic (survival estimates)
-# --------------------------------------------------------
+# CJS BIC - Gelman and WAIC at Bic --------------------------------------------
 
 #sapply(outlist, function(x) x$WAIC$WAIC)
 
@@ -783,6 +713,12 @@ map_dfr(1:length(gelmanCJS_b),function(x) {
 # 3  2013  1.34
 # 4  2015  1.17
 
+# 2022 08 21
+# yr     y
+# <dbl> <dbl>
+#1  2001  1.10
+# 2  2002  1.15
+# 3  2008  1.64
 
 
 con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220517/cjs3_ranef.rds")
@@ -833,26 +769,12 @@ map_dfr(1:length(gelmanCJS_b),function(x) {
 # <dbl> <dbl>
 # 1  2001  1.11
 # 2  2002  1.11
-    
 
-
-survJourn=list()
-for(t in 1:length(outlist)){
-    tmp=outlist[[t]]$samples
-    tmp=tmp[,grepl("ranef.yr",colnames(tmp[[1]]))] %>% map_dfr(~as.data.frame(.x))
-    dailysurvs<-matrix(NA, nrow(tmp),ncol(tmp))
-                        for(d in 1:ncol(tmp)){
-                            dailysurvs[,d]=inv.logit(mean.phi + ranef.yr[d]) # sauve pas mean.phi
-                        }
-                        survJourn[[t]]=dailysurvs
-                        }
-
-
-
-
-
-
-
+# as of 2022 08 21
+# yr     y
+# 1  2008  1.28
+# 2  2009  1.37
+# 3  2015  1.11
 
 con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220517/cjs5.rds")
 outlist <- readRDS(con)
@@ -956,7 +878,8 @@ waic.table[6,3]<-mean(WAIC.b.6$WAIC, na.rm = T)
 
 
 
-# get gelmanRubin statistics and WAIC for Cormack-Jolly-Seber at Metis (survival estimates)--------------------------------------------------------
+
+# CJS METIS - Gelman and WAIC at Metis  -------------------------------------------
 
 # the latest models were ran with 500K. It improved Gelman statistics
 
@@ -1117,8 +1040,91 @@ waic.table[12,3]<-mean(WAIC.m.6$WAIC, na.rm = T) #312.3701
 # 12     6          NA 312.3701 metis
 
 
-# clean up a bit - keep only results? 
-# rm(list=setdiff(ls(), c("years", "waic.table")))
+
+
+
+# clean up ----------------------------------------------------------------
+rm(list=setdiff(ls(), c("years", "waic.table", 'aicT', 'aicTM')))
+
+
+
+
+# extract abundance from final JS models  ---------------------------------
+aicT # bic 
+aicTM # metis
+
+# prepare df to graph
+tmp <- data.frame(yr = rep(c(1998:2003, 2008:2016, 2019),2), site = c(rep('bic',16),rep('metis',16)), N = NA, ymin = NA, ymax = NA, 
+                  surv = NA, min.surv = NA, max.surv = NA)
+
+# bst model for abundance 
+setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/bic/20210304/bic3") # lowest WAIC
+# setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/bic/20210614/bic6")
+
+fd<-list()
+file <-list.files(pattern = ".rds")
+for(i in seq_along(file)){
+    fd[[i]]<-readRDS(file[[i]])
+}
+
+for(i in 1:length(fd)){
+    sample_df=fd[[i]]$samples %>% map(as.data.frame) %>% bind_rows() # c long 
+    N=sample_df[,grepl('Nsuper',colnames(sample_df))]
+    tmp[tmp$site=='bic',]$N[i]=mean(N)
+    tmp[tmp$site=='bic',]$ymin[i]= quantile(N, 0.025)
+    tmp[tmp$site=='bic',]$ymax[i]=quantile(N, 0.975)
+}
+
+
+# now extract with a time lag
+# tmp <- tibble(Nt1 = lead(tmp$N), tmp)
+# tmp$lambda <- tmp$Nt1/tmp$N
+
+
+
+# metis
+setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20210304/metis3")
+# setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20220319/metis6")
+# setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20220322")
+
+fd<-list()
+file <-list.files(pattern = ".rds")
+for(i in seq_along(file)){
+    fd[[i]]<-readRDS(file[[i]])
+}
+
+# check convergence 
+codaSamp<-list()
+for(i in 1:length(fd)){
+    codaSamp[[i]] <- fd[[i]]$samples %>% map(~as.mcmc(.x)) %>% as.mcmc.list()                 
+    plot(codaSamp[[i]][,'Nsuper'], main = paste0("N_y", substr(file, 16, 20))[[i]])
+}
+
+
+# get N
+for(i in 1:length(fd)){
+    sample_df=fd[[i]]$samples %>% map(as.data.frame) %>% bind_rows() 
+    N=sample_df[,grepl('Nsuper',colnames(sample_df))] # un seul N, sur la bonne échelle
+    tmp[tmp$site=='metis',]$N[i]=mean(N)
+    tmp[tmp$site=='metis',]$ymin[i]= quantile(N, 0.025)
+    tmp[tmp$site=='metis',]$ymax[i]=quantile(N, 0.975)
+}
+
+# N <- sapply(fd,function(x) x$summary$all.chains['Nsuper',]) %>%
+#   t() %>% as.data.frame() %>% rename(CIL=`95%CI_low`,CIH=`95%CI_upp`) %>% mutate(yr=years)
+# N$site <- "metis"
+# ggplot(N,aes(x=yr,y=Mean,ymin=CIL,ymax=CIH))+geom_pointrange()
+
+
+tmp1 <- data.frame(yr = rep(c(2004:2007, 2017:2018),2), site = c(rep('bic',6),rep('metis',6)), N = NA, ymin = NA, ymax = NA, surv = NA, min.surv = NA, max.surv = NA)
+results_jollySeber<-rbind(tmp, tmp1)
+
+#export table with probabilities
+results_jollySeber %>%
+    mutate_if(is.numeric, round, digits = 2) 
+
+ggplot(tmp,aes(x=yr,y=N,ymin=ymin,ymax=ymax))+geom_pointrange()
+
 
 
 
@@ -1130,10 +1136,26 @@ waic.table[12,3]<-mean(WAIC.m.6$WAIC, na.rm = T) #312.3701
 load("data/mine/20211031_cmr_pup35.RData")
 years
 
+waic.table
+# model description     WAIC  site
+# 1      1          NA 831.5643   bic
+# 2      2          NA 826.1276   bic
+# 3      3          NA 831.6260   bic
+# 4      4          NA 836.4540   bic
+# 5      5          NA 846.5698   bic
+# 6      6          NA 829.6787   bic
+# 7      1          NA 311.5526 metis
+# 8      2          NA 311.4428 metis
+# 9      3          NA 311.5503 metis
+# 10     4          NA 311.0180 metis
+# 11     5          NA 312.6037 metis
+# 12     6          NA 312.3701 metis
+
+
 
 # best model is either 2 or 4 at Bic - depends on run!
 con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220818/cjs4.rds")
-con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220818/bic_cjs2.rds")
+# con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220818/bic_cjs2.rds")
 # con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220422/bic_cjs2_fewIT.rds")
 
 outlist <- readRDS(con)
@@ -1149,6 +1171,14 @@ ggplot(weanSurvOut,aes(x=yr,y=Mean,ymin=CIL,ymax=CIH))+geom_pointrange()
 #export table with probabilities if necessary 
 weanSurvOut %>%
   mutate_if(is.numeric, round, digits = 2) 
+
+
+
+# CJS bic convergence check -----------------------------------------------
+map(1:16,~ plot(outlist[[.x]]$samples[,'mean.phi'],main=years[[.x]])) # bic model 4
+map(1:16,~ plot(outlist[[.x]]$samples[,'weanSurv'],main=years[[.x]])) # bic
+
+
 
 
 
@@ -1203,16 +1233,8 @@ ggplot(weanSurvOut_m,aes(x=as.factor(yr)))+
 
 
 
-# visual convergence check CJS-------------------------------------------------------
-
-#newOut$WAIC
-#plot(newOut$samples[,'weanSurv'])
-#plot(newOut$samples[,'mean.p'])
-
-map(1:16,~ plot(outlist[[.x]]$samples[,'mean.phi'],main=years[[.x]])) # bic
+# CJS Metis  convergence check -------------------------------------------------------
 map(1:16,~ plot(outlist_m[[.x]]$samples[,'mean.phi'],main=years[[.x]])) # metis
-
-map(1:16,~ plot(outlist[[.x]]$samples[,'weanSurv'],main=years[[.x]])) # bic
 map(1:16,~ plot(outlist_m[[.x]]$samples[,'weanSurv'],main=years[[.x]])) # metis
   
   
@@ -1550,12 +1572,11 @@ map_dfr(1:length(years),function(x) {
 }) %>% as.data.frame() %>% ggplot(aes(x=yr,y=y))+geom_boxplot()
 
 
-
 # this creates a dataframe of daily surv PER year
-dailySurv_bic <- sapply(outlist,function(x) x$summary$all.chains['dailySurv',]) %>% 
-  t() %>% as.data.frame() %>% rename(CIL=`95%CI_low`,CIH=`95%CI_upp`) %>% mutate(yr=years)
-ggplot(dailySurv_bic,aes(x=yr,y=Mean,ymin=CIL,ymax=CIH))+geom_pointrange()
-
+# dailySurv_bic <- sapply(outlist,function(x) x$summary$all.chains['dailySurv',]) %>% 
+#   t() %>% as.data.frame() %>% rename(CIL=`95%CI_low`,CIH=`95%CI_upp`) %>% mutate(yr=years)
+# ggplot(dailySurv_bic,aes(x=yr,y=Mean,ymin=CIL,ymax=CIH))+geom_pointrange()
+# 
 
 
 # birthdates at bic per year from the CJS ----------------------------------------------
