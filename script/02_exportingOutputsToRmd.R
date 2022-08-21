@@ -638,11 +638,6 @@ for(i in 1:length(fd)){
 
 
 
-
-
-
-
-
 # get abundance estimates from the Jolly Seber at each site ------------------------------------------------
 
 # prepare df to graph
@@ -667,55 +662,12 @@ for(i in 1:length(fd)){
     tmp[tmp$site=='bic',]$ymax[i]=quantile(N, 0.975)
 }
 
-# get plot of convergence # only one year at a time
-# df_l <- sample_df %>% select(Nsuper) %>% # select the 'right' raw parameters you monitored in the corresponding model
-#   mutate(chain=rep(1:length(fd[[i]]$samples),each=1000),
-#          it=rep(1:1000,3)) %>% # ATTENTION bon seulement si tu gardes toujours le même nombre d'itérations - 1000 
-#   gather(key="parameter", value="value",-chain,-it)
-# 
-# ps <- df_l %>% ggplot(aes(x=it, y = value,color=chain)) + geom_line()
-# ps + facet_wrap(~parameter, scales = "free")
-# p <- ggplot(df_l,aes(value)) + geom_histogram(aes( y= ..density..),bins = 60)
-# p
-# p + facet_wrap(~parameter, scales = "free")
 
-# now extract with a time lag 
+# now extract with a time lag
 # tmp <- tibble(Nt1 = lead(tmp$N), tmp)
 # tmp$lambda <- tmp$Nt1/tmp$N
 
 
-
-
-
-# check on another type of model
-setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/bic/20210614/bic7") # lowest WAIC
-
-fd<-list()
-file <-list.files(pattern = ".rds")
-for(i in seq_along(file)){
-    fd[[i]]<-readRDS(file[[i]])
-}
-
-codaSamp<-list()
-for(i in 1:length(fd)){
-    codaSamp[[i]] <- fd[[i]]$samples %>% map(~as.mcmc(.x)) %>% as.mcmc.list()                    # transform to coda
-    #plot(codaSamp[[i]][,'Nsuper'], main = paste0("N_y_", substr(file, 14, 18))[[i]])
-    #plot(codaSamp[[i]][,'mean.phi'], main = paste0("mean.phi_y_", substr(file, 14, 18))[[i]]) # plot chain # my last year did not converge well
-    #plot(codaSamp[[i]][,grepl("B", colnames(codaSamp[[i]][[1]]))], main = paste0("B_y_", substr(file, 14, 18))[[i]]) # l nomb de la premieère chaine (pareille partout0)
-    #plot(codaSamp[[i]][,grepl("b", colnames(codaSamp[[i]][[1]]))], main = paste0("b_y_", substr(file, 14, 18))[[i]])
-    plot(codaSamp[[i]][,grepl("N", colnames(codaSamp[[i]][[1]]))], main = paste0("N_y_", substr(file, 14, 18))[[i]])
-}
-
-
-for(i in 1:length(fd)){
-    sample_df=fd[[i]]$samples %>% map(as.data.frame) %>% bind_rows() # c long 
-    N=sample_df[,grepl('Nsuper',colnames(sample_df))]
-    tmp[tmp$site=='bic',]$N[i]=mean(N)
-    tmp[tmp$site=='bic',]$ymin[i]= quantile(N, 0.025)
-    tmp[tmp$site=='bic',]$ymax[i]=quantile(N, 0.975)
-}
-
-ggplot(tmp,aes(x=yr,y=N,ymin=ymin,ymax=ymax))+geom_pointrange()
 
 # metis
 setwd("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/js/metis/20210304/metis3")
@@ -749,7 +701,7 @@ for(i in 1:length(fd)){
 #   t() %>% as.data.frame() %>% rename(CIL=`95%CI_low`,CIH=`95%CI_upp`) %>% mutate(yr=years)
 # N$site <- "metis"
 # ggplot(N,aes(x=yr,y=Mean,ymin=CIL,ymax=CIH))+geom_pointrange()
-# 
+
 
 tmp1 <- data.frame(yr = rep(c(2004:2007, 2017:2018),2), site = c(rep('bic',6),rep('metis',6)), N = NA, ymin = NA, ymax = NA, surv = NA, min.surv = NA, max.surv = NA)
 results_all<-rbind(tmp, tmp1)
@@ -762,7 +714,8 @@ ggplot(tmp,aes(x=yr,y=N,ymin=ymin,ymax=ymax))+geom_pointrange()
 
 
 
-# get gelmanRubin statistics and WAIC for Cormack-Jolly-Seber at Bic (survival estimates)--------------------------------------------------------
+# get gelmanRubin statistics and WAIC for Cormack-Jolly-Seber at Bic (survival estimates)
+# --------------------------------------------------------
 
 #sapply(outlist, function(x) x$WAIC$WAIC)
 
@@ -881,23 +834,21 @@ map_dfr(1:length(gelmanCJS_b),function(x) {
 # 1  2001  1.11
 # 2  2002  1.11
     
-    
 
-# survJourn=list()
-# for(t in 1:length(outlist)){
-#     tmp=outlist[[t]]$samples
-#     tmp=tmp[,grepl("ranef.yr",colnames(tmp[[1]]))] %>% map_dfr(~as.data.frame(.x)) # il me manque le ranef.yr - prendre juste le meilleur modele
-# }
-#     
-#     dailysurvs<-matrix(NA, nrow(tmp),ncol(tmp)
-#                         for(d in 1:ncol(tmp)){ 
-#                             dailysurvs[,d]=inv.logit(mean.phi + ranef.yr[d])
-#                         }
-#                         survJourn[[t]]=dailysurvs
-#                         }
-# 
-# 
-# 
+
+survJourn=list()
+for(t in 1:length(outlist)){
+    tmp=outlist[[t]]$samples
+    tmp=tmp[,grepl("ranef.yr",colnames(tmp[[1]]))] %>% map_dfr(~as.data.frame(.x))
+    dailysurvs<-matrix(NA, nrow(tmp),ncol(tmp))
+                        for(d in 1:ncol(tmp)){
+                            dailysurvs[,d]=inv.logit(mean.phi + ranef.yr[d]) # sauve pas mean.phi
+                        }
+                        survJourn[[t]]=dailysurvs
+                        }
+
+
+
 
 
 
