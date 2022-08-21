@@ -1182,10 +1182,11 @@ years
 
 # best model is either 2 or 4 at Bic - depends on run!
 con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220818/cjs4.rds")
-con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220818/cjs2.rds")
+con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220818/bic_cjs2.rds")
 # con <- gzfile("/Users/LimoilouARenaud/Documents/PostDocI/Projects/cmrSeal/output.nosync/data/cjs/bic/20220422/bic_cjs2_fewIT.rds")
 
 outlist <- readRDS(con)
+
 sapply(outlist, function(x) x$WAIC$WAIC) # double check with what's in WAIc.b2
 
 # extract df to plot
