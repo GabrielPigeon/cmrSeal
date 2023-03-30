@@ -74,8 +74,7 @@ cjs <- nimbleCode({
     for (i in 1:nind) {
         # Define latent state at first capture
         z[i, f[i]] <- 1
-        for (t in (f[i] + 1):lastOcc) {
-            # for (t in (f[i] + 1):(bDate[i]+weanedAge-firstOcc+1)){   # potential alternative to really truncate after weaning, but beta.weaned and sbw will not longuer be identifiaable
+        for (t in (f[i] + 1):n.occasions) {
             
             # State process
             z[i, t] ~ dbern(mu1[i, t])
@@ -137,7 +136,7 @@ for(t in unique(year_int)){
 
 # Calculate the last observed occasion for each 'myID' 
 # by finding the maximum index of the value 1 in each row of the 'trueOcc' matrix
-lastOcc <- apply(trueOcc, 1, function(x) max(which(x==1)))
+# lastOcc <- apply(trueOcc, 1, function(x) max(which(x==1)))
 # ex ID 3406 was last seen on julian day 186 in 2001. This is index 48 of allJJ.
 
 # Get the current site's pup data
@@ -208,17 +207,33 @@ df$const$first.bd <- ifelse(
     tmptmp
 )
     
+# Define a function named known.state.cjs that takes a capture history matrix ch as input
 known.state.cjs <- function(ch) {
+    
+    # Copy the capture history matrix to a new matrix named state
     state <- ch
+    
+    # Loop over each individual in the capture history matrix
     for (i in 1:dim(ch)[1]) {
+        
+        # Determine the first capture occasion (n1) and last capture occasion (n2) for the current individual
         n1 <- min(which(ch[i, ] == 1))
         n2 <- max(which(ch[i, ] == 1))
-        state[i, 1:n2] <- 1 # added 1 but still NAs in Z
+        
+        # Set the state of the individual to 1 for all capture occasions up to and including the last capture occasion
+        state[i, 1:n2] <- 1
+        
+        # Set the state of the individual to NA for the first capture occasion
         state[i, n1] <- NA
     }
+    
+    # Set the state of individuals that were never captured to NA for all capture occasions
     state[state == 0] <- NA
+    
+    # Return the state matrix
     return(state)
 }
+
 
 inits <- function() {
     list(
