@@ -18,7 +18,7 @@ library(boot)
 load("~/projects/def-pelleti2/renl2702/phoques/2022-12-05_pupDataCjsCombined.RData")
 
 # nimble model
-cjs2 <- nimbleCode({
+cjs <- nimbleCode({
 
     # add linear growth curve
     # 10 kg at birth # changed to 8 since 10 occurred before first bd
@@ -96,56 +96,104 @@ cjs2 <- nimbleCode({
     weanSurv <- dailySurv^weanedAge
 })
 
-# the code calculates captureJJ and allJJ over all years, and concatenates all pup_ch matrices into one large matrix ch_dum. 
-captureJJ = unique(unlist(lapply(pupData_list, function(x) x$julianDay)))
-allJJ <- seq(min(captureJJ),max(captureJJ))
 
-ch_dum <- matrix(0, nrow = sum(sapply(pup_ch, nrow)), ncol = length(allJJ))
-idx_start <- 1
+# loop over sites ---------------------------------------------------------
 
-# the loop that was used to create ch_dum for each year is now replaced by a loop that iterates over each pup_ch matrix and copies the data to ch_dum (rows)
-for (i in 1:length(pup_ch)) {
-    pup_ch_i <- pup_ch[[i]]
-    tmp <- match(pup_ch_i$julianDay, allJJ)
+# this code matches the minimal dates of each individual to the corresponding rows in the ch_dum matrix, sets the first.bd constant value to the minimum date for each individual in the data set, and sets the number of fake and real occasions in the data set. Finally, it renames the list element to indicate which site it belongs to. This code is executed for each site in the pupData_list_2sites list.
+
+# create vector of site
+site <- c('bic','metis')
+
+# Initialize empty lists to store data and output
+dflist <- list()
+outlist <- list()
+
+# Loop over the 2 sites in the pupData_list_2sites
+for (site in 1:2) {
+    # Get the current site's pup data
+    pupData <- pupData_list_2sites[[site]]
+    
+    # Get the unique Julian days in the current site's pup data
+    captureJJ <- unique(pupData$julianDay)
+    
+    # Create a vector of all possible Julian days (min to max)
+    allJJ <- seq(min(captureJJ), max(captureJJ))
+    
+    # Initialize a matrix to store capture history data
+    ch_dum <- matrix(0, nrow = nrow(pup_ch_l[[site]]), ncol = length(allJJ))
+    
+    # Match the unique Julian days to their positions in the allJJ vector
+    tmp <- match(captureJJ, allJJ)
+    
+    # Fill in the ch_dum matrix with the capture history data
     for (i2 in 1:length(tmp)) {
-        ch_dum[idx_start:(idx_start+nrow(pup_ch_i)-1), tmp[i2]] <- pup_ch_i[,i2]
+        ch_dum[,tmp[i2]] <- pup_ch_l[[site]][,i2]
     }
-    idx_start <- idx_start + nrow(pup_ch_i)
-}
-rownames(ch_dum) <- unlist(lapply(pup_ch, rownames))
+    
+    # Set the row names of the ch_dum matrix to match the pup data
+    rownames(ch_dum) <- rownames(pup_ch_l[[site]])
+    
+    # Define a function to get the first non-zero value in a vector (the earliest possible entry date)
+    get.first <- function(x) min(which(x != 0)) 
+    
+    # Store the capture history data and pup mass in a list
+    dflist[[site]] <- list(
+        data = list(y = as.matrix(ch_dum),
+                    mass = pupData$mass),
+        const = list()
+    )
+    
+    # Store additional constants in the list
+    dflist[[site]]$const <- list(
+        f = apply(dflist[[site]]$data$y, 1, function(x) get.first(x)),
+        nind = nrow(dflist[[site]]$data$y),
+        n.occasions = ncol(dflist[[site]]$data$y),
+        captureJJ = allJJ,
+        firstOcc = min(allJJ),
+        Nw = nrow(pupData),
+        weanedAge = 30,
+        julianDay = pupData$julianDay,
+        nimbleID = pupData$nimbleID,
+        first.bd = NA,
+        fakeOcc = which(colSums(dflist[[site]]$data$y) == 0),
+        realOcc = which(colSums(dflist[[site]]$data$y) > 0),
+        min.bd = 100,
+        OccuN = NULL,
+        nfakeOcc = NULL,
+        nrealOcc = NULL
+    )
+    
+    # Set the OccuN constant to force the model to ignore order of daily surv multiplication between occasions
+    dflist[[site]]$const$OccuN <- rep(1:(length(dflist[[site]]$const$realOcc)), c(diff(dflist[[site]]$const$realOcc), 1))
+    
+    # Pull a vector of minimal dates for existing ID in the current site's pup data
+    tmptmp <- pupData %>% 
+        group_by(myID) %>% 
+        summarise(min.bd = min(julianDay))
+    
+    # Match the minimal dates to the ch_dum matrix rows using their myID
+    tmptmp <- tmptmp$min.bd[match(rownames(dflist[[site]]$data$y), tmptmp$myID)]
+    
+    # Set the 'first.bd' constant value to the minimum date for each individual in the data set
+    dflist[[site]]$const$first.bd <- ifelse(
+        is.na(tmptmp),
+        max(unique(pupData_list_2sites[[site]]$julianDay)),
+        tmptmp
+    )
+    
+    # Set the number of fake and real occasions in the data set
+    dflist[[site]]$const$nfakeOcc <- length(dflist[[site]]$const$fakeOcc)
+    dflist[[site]]$const$nrealOcc <- length(dflist[[site]]$const$realOcc)
+    
+    # Rename the list element to indicate which site it belongs to
+    names(dflist)[[site]] <- paste0("Site", site)
+}   
 
-get.first <- function(x) min(which(x != 0))
 
-dflist <- list(
-    data=list(y=as.matrix(ch_dum),
-              mass=unlist(lapply(pupData_list, function(x) x$mass))),
-    const=list()
-)
 
-dflist$const <- list(
-    f = lapply(dflist$data$y, function(x) get.first(x)),
-    nind = nrow(dflist$data$y),
-    n.occasions = ncol(dflist$data$y),
-    captureJJ = allJJ,
-    firstOcc = min(allJJ),
-    Nw = sum(sapply(pupData_list, nrow)),
-    weanedAge = 30,
-    julianDay = do.call(c, lapply(pupData_list, function(x) x$julianDay)),
-    nimbleID = do.call(c, lapply(pupData_list, function(x) x$nimbleID)),
-    first.bd = NA,
-    fakeOcc = which(colSums(dflist$data$y) == 0),
-    realOcc = which(colSums(dflist$data$y) > 0),
-    min.bd = 100
-)
 
-dflist$const$OccuN <- diff(c(0, dflist$const$realOcc))
-tmptmp <- pupData_list |>
-    group_by(myID) |> 
-    summarise(min.bd = min(julianDay)) |> 
-    pull(min.bd)[match(unlist(lapply(pup_ch, rownames)), pull(myID))]
-dflist$const$first.bd <- ifelse(is.na(tmptmp), max(unique(do.call(c, lapply(pupData_list, function(x) x$julianDay)))), tmptmp)
-dflist$const$nfakeOcc <- length(dflist$const$fakeOcc)
-dflist$const$nrealOcc <- length(dflist$const$realOcc)
+
+
 
 
 
@@ -196,7 +244,7 @@ parameters <-
     ) # added w and z to WAIC - here z is shitty
 
 newOut <- nimbleMCMC(
-    code = cjs2,
+    code = cjs,
     constants = dflist[[i]]$const,
     data = dflist[[i]]$data,
     inits = inits(),
