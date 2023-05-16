@@ -79,6 +79,7 @@ daypath="cache"
 
 fd<-list()
 file <-list.files(path = daypath,pattern = ".rds",full.names = T)
+file <- file[str_detect(file,"_m")]
 
 waic_table <- data.frame(cjs_m = rep(NA,length(file)),fd.id=NA, WAIC = NA, pWAIC=NA)
 for(i in seq_along(file)){
@@ -95,7 +96,7 @@ waic_table
 
 # Model convergence -----------------------------------------
 
-bestOut <- fd[[waic_table$id[1]]]  # lowest WAIC
+bestOut <- fd[[waic_table$fd.id[1]]]  # lowest WAIC
 
 
 # plot important parameters
@@ -171,7 +172,11 @@ P.table=betaz %>% transmute_at(vars(`p.betaYear[1]`:`p.betaYear[16]`),
 ggplot(P.table,aes(x=year,color=as.factor(site),y=mean,ymin=cil,ymax=cih))+
     geom_pointrange()+
     labs(x='Year',y='Capture probability')+
-    theme_bw()
+    labs(x='Year',y='Capture probability') +
+    scale_shape_manual(labels = c("Bic Island", "Métis"),values = c(21,19)) +
+    guides(shape=guide_legend(title=NULL)) +
+    cowplot::theme_cowplot(10) +
+    theme(panel.grid.major = element_line(color="lightgrey", linetype = 'dotted'))
 
 
 #    P ~ site*yr fix (m2c,m15c)
@@ -185,29 +190,20 @@ P.table=betaz %>% transmute_at(vars(`betaYear[1, 1]`:`betaYear[2, 16]`),~ plogis
     mutate(site=rep(0:1,16),year=rep(c(1998:2003, 2008:2016, 2019),each=2)) %>% 
     mutate(year=ifelse(site==0,year-0.1,year+0.1))
 
-ggplot(P.table,aes(x=year,color=as.factor(site),y=mean,ymin=cil,ymax=cih))+geom_pointrange()+
-    labs(x='Year',y='Capture probability')+
-    theme_bw()
-P.table=betaz %>% transmute_at(vars(`betaYear[1, 1]`:`betaYear[2, 16]`),~ plogis(.x)) %>% 
-    map_dfr(function(x){
-        tibble(mean=mean(x),
-               cil=quantile(x,0.025),
-               cih=quantile(x,0.975)
-        )
-    },.id = "siteYr") %>% 
-    mutate(site=rep(0:1,16),year=rep(c(1998:2003, 2008:2016, 2019),each=2)) %>% 
-    mutate(year=ifelse(site==0,year-0.1,year+0.1))
+ggplot(P.table,aes(x=year,shape=as.factor(site),y=mean,ymin=cil,ymax=cih))+geom_pointrange()+
+    labs(x='Year',y='Capture probability') +
+    scale_shape_manual(labels = c("Bic Island", "Métis"),values = c(21,19)) +
+    guides(shape=guide_legend(title=NULL)) +
+    cowplot::theme_cowplot(10) +
+    theme(panel.grid.major = element_line(color="lightgrey", linetype = 'dotted'))
 
-ggplot(P.table,aes(x=year,color=as.factor(site),y=mean,ymin=cil,ymax=cih))+geom_pointrange()+
-    labs(x='Year',y='Capture probability')+
-    theme_bw()
 
 # p ~ year*Occ
 
 betaYearjj[year_int[i],t]
 
 p.occ=expand.grid(year=1:16,Occ=1:55)
-p.occ=apply(phi.occ,1,function(x){
+p.occ=apply(p.occ,1,function(x){
     tmp=plogis(betaz[,paste0("betaYearjj[",x[1],", ",x[2],"]")]+betaz[,paste0("mean.p[1, ",x[1],"]")])
     c(x[1],x[2], mean=mean(tmp),
       cil=as.numeric(quantile(tmp,0.025)),
@@ -239,11 +235,13 @@ Phi.table=betaz %>% transmute(m0=plogis(`phi.mean[1]`),
         )
     },.id = "sexSite") %>% 
     mutate(site=rep(0:1,2),sex=as.factor(rep(c("male","female"))),each=2)
-ggplot(Phi.table,aes(x=sex,color=as.factor(site),y=mean,ymin=cil,ymax=cih))+
+ggplot(Phi.table,aes(x=sex,shape=as.factor(site),y=mean,ymin=cil,ymax=cih))+
     geom_pointrange(position = position_dodge(w=0.2))+
     labs(x='sex',y='Daily survival probability')+
-    theme_bw()
-
+    scale_shape_manual(labels = c("Bic Island", "Métis"),values = c(21,19)) +
+    guides(shape=guide_legend(title=NULL)) +
+    cowplot::theme_cowplot(10) +
+    theme(panel.grid.major = element_line(color="lightgrey", linetype = 'dotted'))
 
 # phi ~  site*year
 Phi.table=P.table=betaz %>% transmute_at(vars(`phi.betaYear[1, 1]`:`phi.betaYear[2, 16]`),~ plogis(.x)) %>% 
@@ -296,6 +294,44 @@ ggplot(phi.occ,aes(x=Occ,color=as.factor(year),y=mean))+
     labs(x='year',y='Daily survival probability')+
     theme_bw()
 
+
+
+
+# output from JS model ----------------------------------------------------------
+
+
+file <- paste0("cache/20230516-11h_js1c_",1:16,".rds")
+fd.js <- list()
+for(i in seq_along(file)){
+    fd.js[[i]]<-try(readRDS(file[[i]]))
+    
+}
+goodYear=which(map_chr(fd.js,class)!="try-error")
+years=c(1998:2003,2008:2016,2019)
+Nsupers <- map_dfr(goodYear,function(i){
+    Nsup1 <- fd.js[[i]]$samples[,"NsuperS1"]
+    Nsup0 <- fd.js[[i]]$samples[,"Nsuper"]-Nsup1
+    weanSurv0=unlist((bestOut$samples[,paste0("phi.betaYear[1, ",i,"]")]))
+    weanSurv1=unlist(bestOut$samples[,paste0("phi.betaYear[2, ",i,"]")])
+    
+    tibble(yr=i,year=years[i],
+           NSuper=c(as.numeric(fd.js[[i]]$samples[,"Nsuper"]-Nsup1),as.numeric(Nsup1)),
+           weaSurv=c(sample(weanSurv0,length(Nsup1)),sample(weanSurv1,length(Nsup1))),
+           site=rep(0:1,each=length(Nsup1)),
+           it=rep(1:length(Nsup1),2))
+})
+
+Nsupers %>% group_by(year,site) %>% 
+    summarise(y=median(NSuper),ymin=quantile(NSuper,0.025),ymax=quantile(NSuper,0.975)) %>% 
+ggplot(aes(x=year,y=y,ymin=ymin,ymax=ymax,shape=as.factor(site)))+
+    geom_pointrange(position = position_dodge(w=0.4))+
+    labs(x='Year',y='Seal pup abundance') +
+    scale_shape_manual(labels = c("Bic Island", "Métis"),values = c(21,19)) +
+    guides(shape=guide_legend(title=NULL)) +
+    cowplot::theme_cowplot(10) +
+    theme(panel.grid.major = element_line(color="lightgrey", linetype = 'dotted'))
+
+Nsupers %>% group_by(it) %>% summ
 
 
 # 
@@ -448,8 +484,6 @@ traceplot(outm7b$samples[,c('mean.p',"mean.phi","betaSite",
 traceplot(outm7c$samples[,c('mean.p',"mean.phi","betaSite",
                             "betaYear[4]","betaYear[12]","sd.p",
                             "bDate[6]","mu.bd","sd.bd")])
-
-
 
 
 
