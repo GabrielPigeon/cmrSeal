@@ -1,5 +1,5 @@
-args = commandArgs(trailingOnly=TRUE)
-cy=ifelse(length(myarg)==0,1,args[1])
+myargs = commandArgs(trailingOnly=TRUE)
+cy=ifelse(length(myargs)==0,1,myargs[1])
 # script for estimating preweaning survival in harbour seal using a cjs model 
 # code adapted from Kéry and Schaub 2012.
 # model fitting a constant phi and a constant p (mean.p)(m1 in model selection table)
