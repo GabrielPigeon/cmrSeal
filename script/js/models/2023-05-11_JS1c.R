@@ -13,7 +13,7 @@ library(nimbleEcology)
 library(lubridate)# function now to calculate time to run model
 
 # mydat for all yrs -------------------------------------------------------
-# df_syjs.rds <- read_rds("cache/df_syjs.rds")
+df.syjs <- read_rds("cache/df_syjs.rds")
 
 # nimble model
 js <- nimbleCode({
